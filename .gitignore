@@ -1,0 +1,9 @@
+node_modules/
+dist/
+cosmos-export/
+index.html
+.cosmos/
+.cursor/
+bun.lock
+bun.lockb
+*.diff.png
