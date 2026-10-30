@@ -1,15 +1,22 @@
 {
   "name": "@tscircuit/cad-collision-checking",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "description": "Step-based continuous collision checking for CAD assembly movements",
   "type": "module",
   "module": "lib/index.ts",
   "main": "lib/index.ts",
   "types": "lib/index.ts",
-  "files": ["lib"],
-  "repository": { "type": "git", "url": "https://github.com/tscircuit/cad-collision-checking" },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tscircuit/cad-collision-checking"
+  },
   "license": "MIT",
-  "publishConfig": { "registry": "https://npm.pkg.github.com" },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
@@ -19,8 +26,14 @@
     "start": "cosmos",
     "build:site": "cosmos-export"
   },
-  "dependencies": { "manifold-3d": "3.5.4" },
-  "peerDependencies": { "@tscircuit/solver-utils": "*", "graphics-debug": "*", "typescript": "^5" },
+  "dependencies": {
+    "manifold-3d": "3.5.4"
+  },
+  "peerDependencies": {
+    "@tscircuit/solver-utils": "*",
+    "graphics-debug": "*",
+    "typescript": "^5"
+  },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@tscircuit/solver-utils": "^0.0.23",
