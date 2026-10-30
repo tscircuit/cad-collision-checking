@@ -5,7 +5,12 @@ iterative `BaseSolver` from `@tscircuit/solver-utils`. The solver accepts closed
 triangle meshes and ordered movements. It has no dependency on tscircuit/core,
 Circuit JSON, JSCAD, or a renderer.
 
-![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.svg)
+![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
+
+The 3D integration in this branch depends on
+[graphics-debug-3d #1](https://github.com/tscircuit/graphics-debug-3d/pull/1) and
+[solver-utils #54](https://github.com/tscircuit/solver-utils/pull/54). The published
+0.0.1 release below has the original 2D debugger.
 
 ## Install
 
@@ -101,9 +106,20 @@ bun run build:site
 ```
 
 The fixtures use `GenericSolverDebugger`, with single-step/solve/animate controls,
-live stats, downloadable constructor inputs, and three orthographic views.
+live stats, downloadable constructor inputs, and an orbitable PoppyGL 3D view.
 Orange geometry shows actual swept intersections. `getConstructorParams()`,
-`getOutput()`, `computeProgress()`, and `visualize()` follow solver-utils patterns.
+`getOutput()`, and `computeProgress()` follow solver-utils patterns.
+`visualize3d()` returns serializable `GraphicsObject3d` meshes, movement lines,
+labels, and stable bounds. The debugger uses the custom-renderer hook instead of
+projecting 3D geometry into the inherited 2D `visualize()` format.
+Snapshots use the same PoppyGL renderer as the interactive viewer. Blue shows
+moving solids, translucent gray shows stationary obstacles, and orange shows
+actual swept intersection volume. The movement guides are not collision samples.
+
+![Assembled pose](./tests/__snapshots__/stage-0-assembled.snap.png)
+![Cover and bolt lifted together](./tests/__snapshots__/stage-1-lift-cover-and-bolt.snap.png)
+![Bolt removed through the bracket](./tests/__snapshots__/stage-2-remove-bolt.snap.png)
+
 Each step prepares one solid, constructs a sweep, checks one candidate obstacle,
 or applies one target translation. Individual native geometry operations are
 synchronous. Call `dispose()` if abandoning an unfinished solver; completion and

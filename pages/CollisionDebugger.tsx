@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { GenericSolverDebugger } from "@tscircuit/solver-utils/react"
+import { InteractiveGraphics3d } from "@tscircuit/graphics-debug-3d/react"
 import {
   CadCollisionCheckingSolver,
   loadCollisionManifold,
@@ -36,5 +37,16 @@ export function CollisionDebugger({
   }, [problem])
   if (error) return <p>{error}</p>
   if (!problem) return <p>Loading collision geometry…</p>
-  return <GenericSolverDebugger createSolver={createSolver} />
+  return (
+    <GenericSolverDebugger
+      createSolver={createSolver}
+      customRenderer={{
+        name: "PoppyGL 3D",
+        render: () => (
+          <InteractiveGraphics3d graphics={solver.current!.visualize3d()} />
+        ),
+        getDownload: () => solver.current!.visualize3d(),
+      }}
+    />
+  )
 }

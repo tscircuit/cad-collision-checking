@@ -1,4 +1,4 @@
-import { getSolverSvg } from "./fixtures/get-solver-svg"
+import { getSolverPng } from "./fixtures/get-solver-png"
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { clearanceProblem } from "./fixtures/problems"
@@ -10,5 +10,5 @@ test("sweeps preserve bores in both moving and stationary solids and allow face 
   solver.solve()
   expect(solver.solved).toBe(true)
   expect(solver.getOutput().collisions).toEqual([])
-  await expect(getSolverSvg(solver)).toMatchSvgSnapshot(import.meta.path)
+  await expect(await getSolverPng(solver)).toMatchPngSnapshot(import.meta.path)
 })

@@ -1,4 +1,8 @@
-import type { GraphicsObject, Line } from "graphics-debug"
+import type {
+  GraphicsMesh3d,
+  GraphicsObject3d,
+  Point3d,
+} from "@tscircuit/graphics-debug-3d"
 import type { Vec3 } from "manifold-3d"
 import { getProblemBounds } from "./get-problem-bounds"
 import type {
@@ -7,9 +11,26 @@ import type {
   CollisionSolidId,
 } from "./types"
 
-/** Orthographic XY/XZ/YZ views of right-handed world points in mm (+Z above).
- * Offsets are world displacement vectors. Views are laid out in drawing space;
- * orange triangles show actual swept intersection geometry, not bounding boxes. */
+function meshPositions(mesh: CollisionMesh): number[] {
+  const positions: number[] = []
+  for (let i = 0; i < mesh.vertProperties.length; i += mesh.numProp)
+    positions.push(...mesh.vertProperties.slice(i, i + 3))
+  return positions
+}
+
+function meshCenter(mesh: CollisionMesh): Point3d {
+  const min = [Infinity, Infinity, Infinity]
+  const max = [-Infinity, -Infinity, -Infinity]
+  for (let i = 0; i < mesh.vertProperties.length; i += mesh.numProp)
+    for (let axis = 0; axis < 3; axis++) {
+      min[axis] = Math.min(min[axis], mesh.vertProperties[i + axis])
+      max[axis] = Math.max(max[axis], mesh.vertProperties[i + axis])
+    }
+  return min.map((n, axis) => (n + max[axis]) / 2) as Point3d
+}
+
+/** Actual world-space mesh geometry, including cumulative movements and swept
+ * intersections. A stable program envelope keeps snapshots comparable. */
 export function visualizeCollisionProblem({
   inputProblem,
   offsets,
@@ -20,121 +41,58 @@ export function visualizeCollisionProblem({
   offsets: Map<CollisionSolidId, Vec3>
   collisionMeshes: CollisionMesh[]
   moveIndex: number
-}): GraphicsObject {
-  const drawing: GraphicsObject = {
+}): GraphicsObject3d {
+  const movingIds = new Set(inputProblem.moves.flatMap((move) => move.solidIds))
+  const meshes: GraphicsMesh3d[] = inputProblem.solids.map((solid) => ({
+    id: solid.solidId,
+    positions: meshPositions(solid.mesh),
+    indices: [...solid.mesh.triVerts],
+    position: [...(offsets.get(solid.solidId) ?? [0, 0, 0])],
+    color: movingIds.has(solid.solidId) ? "#3283b5" : "#94a3b8",
+    opacity: movingIds.has(solid.solidId) ? 1 : 0.45,
+  }))
+  for (const [index, mesh] of collisionMeshes.entries())
+    meshes.push({
+      id: `intersection-${index}`,
+      positions: meshPositions(mesh),
+      indices: [...mesh.triVerts],
+      color: "#f97316",
+    })
+  const graphics: GraphicsObject3d = {
+    title: `${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves checked - ${collisionMeshes.length} collision(s)`,
+    bounds: getProblemBounds(inputProblem),
+    meshes,
     lines: [],
-    points: [],
-    coordinateSystem: "cartesian",
-    title: `CAD collision check: ${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves complete`,
+    labels: inputProblem.solids.map((solid) => ({
+      text: solid.name,
+      position: meshCenter(solid.mesh).map(
+        (n, axis) => n + (offsets.get(solid.solidId)?.[axis] ?? 0),
+      ) as Point3d,
+    })),
   }
-  const bounds = getProblemBounds(inputProblem)
-  const extent = Math.max(
-    10,
-    ...bounds.max.map((coordinate, axis) => coordinate - bounds.min[axis]),
-  )
-  for (const [viewIndex, axes] of [
-    [0, 1],
-    [0, 2],
-    [1, 2],
-  ].entries()) {
-    const shiftX = (viewIndex % 2) * extent * 1.4 - bounds.min[axes[0]]
-    const shiftY =
-      -Math.floor(viewIndex / 2) * extent * 1.4 - bounds.min[axes[1]]
-    drawing.points!.push({
-      x: shiftX + bounds.min[axes[0]],
-      y: shiftY + bounds.max[axes[1]] + extent * 0.12,
-      label: ["XY (top)", "XZ (side)", "YZ (side)"][viewIndex],
-      color: "transparent",
-    })
-    for (const solid of inputProblem.solids) {
-      const offset = offsets.get(solid.solidId) ?? [0, 0, 0]
-      drawing.lines!.push(
-        ...meshLines({
-          mesh: solid.mesh,
-          offset,
-          axes,
-          shiftX,
-          shiftY,
-          color: "#57728b",
-        }),
+  // Full ordered paths include movements where a part travels with a group.
+  const pathOffsets = new Map<CollisionSolidId, Vec3>()
+  for (const move of inputProblem.moves)
+    for (const solidId of new Set(move.solidIds)) {
+      const solid = inputProblem.solids.find(
+        (candidate) => candidate.solidId === solidId,
+      )!
+      const offset = pathOffsets.get(solidId) ?? [0, 0, 0]
+      const start = meshCenter(solid.mesh).map(
+        (n, axis) => n + offset[axis],
+      ) as Point3d
+      const end = start.map((n, axis) => n + move.translation[axis]) as Point3d
+      if (Math.hypot(...move.translation))
+        graphics.lines!.push({
+          points: [start, end],
+          dashed: true,
+          arrow: true,
+          color: "#64748b",
+        })
+      pathOffsets.set(
+        solidId,
+        offset.map((n, axis) => n + move.translation[axis]) as Vec3,
       )
-      const positions = solid.mesh.vertProperties
-      const cx = positions[axes[0]] + offset[axes[0]] + shiftX
-      const cy = positions[axes[1]] + offset[axes[1]] + shiftY
-      drawing.points!.push({
-        x: cx,
-        y: cy - extent * 0.07,
-        label: solid.name,
-        color: "transparent",
-      })
     }
-    for (const mesh of collisionMeshes)
-      drawing.lines!.push(
-        ...meshLines({
-          mesh,
-          offset: [0, 0, 0],
-          axes,
-          shiftX,
-          shiftY,
-          color: "#e05a22",
-        }),
-      )
-  }
-  drawing.points!.push(
-    {
-      x: extent * 1.4,
-      y: -extent * 1.1,
-      label: `${collisionMeshes.length} collision(s)`,
-      color: "#e05a22",
-    },
-    {
-      x: extent * 1.4,
-      y: -extent * 1.25,
-      label: "Orange: swept intersection",
-      color: "transparent",
-    },
-    {
-      x: extent * 1.4,
-      y: -extent * 1.4,
-      label: "Blue: solid triangles",
-      color: "transparent",
-    },
-  )
-  return drawing
-}
-
-function meshLines({
-  mesh,
-  offset,
-  axes,
-  shiftX,
-  shiftY,
-  color,
-}: {
-  mesh: CollisionMesh
-  offset: Vec3
-  axes: number[]
-  shiftX: number
-  shiftY: number
-  color: string
-}): Line[] {
-  const lines: Line[] = []
-  for (let index = 0; index < mesh.triVerts.length; index += 3) {
-    const triangle = mesh.triVerts.slice(index, index + 3)
-    lines.push({
-      points: [...triangle, triangle[0]].map((vertex) => ({
-        x:
-          mesh.vertProperties[vertex * mesh.numProp + axes[0]] +
-          offset[axes[0]] +
-          shiftX,
-        y:
-          mesh.vertProperties[vertex * mesh.numProp + axes[1]] +
-          offset[axes[1]] +
-          shiftY,
-      })),
-      strokeColor: color,
-      strokeWidth: 0.08,
-    })
-  }
-  return lines
+  return graphics
 }

@@ -1,4 +1,4 @@
-import { getSolverSvg } from "./fixtures/get-solver-svg"
+import { getSolverPng } from "./fixtures/get-solver-png"
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { box } from "./fixtures/problems"
@@ -30,7 +30,9 @@ test("existing overlaps may separate while deeper movement reports new occupied 
       expect(
         solver.getOutput().collisions[0].sweptIntersectionVolumeMm3,
       ).toBeCloseTo(48, 5)
-      await expect(getSolverSvg(solver)).toMatchSvgSnapshot(import.meta.path)
+      await expect(await getSolverPng(solver)).toMatchPngSnapshot(
+        import.meta.path,
+      )
     }
   }
 })
