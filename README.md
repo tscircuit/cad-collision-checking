@@ -29,13 +29,17 @@ import {
 
 await loadCollisionManifold()
 const problem: CadCollisionProblem = {
-  solids: [/* { solidId, name, mesh } */],
-  moves: [{
-    moveId: "lift-cover",
-    name: "Lift cover and bolts",
-    solidIds: ["cover", "bolt1", "bolt2"],
-    translation: [0, 0, 24],
-  }],
+  solids: [
+    /* { solidId, name, mesh } */
+  ],
+  moves: [
+    {
+      moveId: "lift-cover",
+      name: "Lift cover and bolts",
+      solidIds: ["cover", "bolt1", "bolt2"],
+      translation: [0, 0, 24],
+    },
+  ],
 }
 const solver = new CadCollisionCheckingSolver(problem)
 try {

@@ -23,7 +23,7 @@ export function visualizeCollisionProblem({
 }): GraphicsObject {
   const drawing: GraphicsObject = {
     lines: [],
-    texts: [],
+    points: [],
     coordinateSystem: "cartesian",
     title: `CAD collision check: ${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves complete`,
   }
@@ -40,11 +40,11 @@ export function visualizeCollisionProblem({
     const shiftX = (viewIndex % 2) * extent * 1.4 - bounds.min[axes[0]]
     const shiftY =
       -Math.floor(viewIndex / 2) * extent * 1.4 - bounds.min[axes[1]]
-    drawing.texts!.push({
+    drawing.points!.push({
       x: shiftX + bounds.min[axes[0]],
       y: shiftY + bounds.max[axes[1]] + extent * 0.12,
-      text: ["XY (top)", "XZ (side)", "YZ (side)"][viewIndex],
-      fontSize: 18,
+      label: ["XY (top)", "XZ (side)", "YZ (side)"][viewIndex],
+      color: "transparent",
     })
     for (const solid of inputProblem.solids) {
       const offset = offsets.get(solid.solidId) ?? [0, 0, 0]
@@ -61,12 +61,11 @@ export function visualizeCollisionProblem({
       const positions = solid.mesh.vertProperties
       const cx = positions[axes[0]] + offset[axes[0]] + shiftX
       const cy = positions[axes[1]] + offset[axes[1]] + shiftY
-      drawing.texts!.push({
+      drawing.points!.push({
         x: cx,
         y: cy - extent * 0.07,
-        text: solid.name,
-        fontSize: 14,
-        color: "#334155",
+        label: solid.name,
+        color: "transparent",
       })
     }
     for (const mesh of collisionMeshes)
@@ -81,25 +80,24 @@ export function visualizeCollisionProblem({
         }),
       )
   }
-  drawing.texts!.push(
+  drawing.points!.push(
     {
       x: extent * 1.4,
       y: -extent * 1.1,
-      text: `${collisionMeshes.length} collision(s)`,
-      fontSize: 18,
+      label: `${collisionMeshes.length} collision(s)`,
       color: "#e05a22",
     },
     {
       x: extent * 1.4,
       y: -extent * 1.25,
-      text: "Orange: swept intersection",
-      fontSize: 14,
+      label: "Orange: swept intersection",
+      color: "transparent",
     },
     {
       x: extent * 1.4,
       y: -extent * 1.4,
-      text: "Blue: solid triangles",
-      fontSize: 14,
+      label: "Blue: solid triangles",
+      color: "transparent",
     },
   )
   return drawing
