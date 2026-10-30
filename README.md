@@ -2,8 +2,9 @@
 
 Continuous collision checking for CAD assembly translations, implemented as an
 iterative `BaseSolver` from `@tscircuit/solver-utils`. The solver accepts closed
-triangle meshes and ordered movements. It has no dependency on tscircuit/core,
-Circuit JSON, JSCAD, or a renderer.
+triangle meshes and ordered movements. Collision detection is independent of
+tscircuit/core, Circuit JSON, JSCAD and rendering. The optional visualization uses
+the scene types from `graphics-debug-3d`.
 
 ![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
 
