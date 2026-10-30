@@ -12,7 +12,9 @@ expect.extend({
       `${name ?? basename(testPath).replace(/\.test\.tsx?$/, "")}.snap.png`,
     )
     const update =
-      process.argv.includes("-u") || process.argv.includes("--update-snapshots")
+      process.env.UPDATE_SNAPSHOTS === "1" ||
+      process.argv.includes("-u") ||
+      process.argv.includes("--update-snapshots")
     if (update || (!existsSync(filename) && !process.env.CI)) {
       mkdirSync(directory, { recursive: true })
       writeFileSync(filename, received)

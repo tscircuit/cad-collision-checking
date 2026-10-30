@@ -107,13 +107,18 @@ bun run build:site
 ```
 
 The fixtures use `GenericSolverDebugger`, with single-step/solve/animate controls,
-live stats, downloadable constructor inputs, and an orbitable PoppyGL 3D view.
+live stats, downloadable constructor inputs, and a Three.js/OrbitControls 3D view.
 Orange geometry shows actual swept intersections. `getConstructorParams()`,
 `getOutput()`, and `computeProgress()` follow solver-utils patterns.
 `visualize3d()` returns serializable `GraphicsObject3d` meshes, movement lines,
-labels, and stable bounds. The debugger uses the custom-renderer hook instead of
+labels, stable bounds, and optional `cameraPosition`/`cameraTarget`. The debugger uses the custom-renderer hook instead of
 projecting 3D geometry into the inherited 2D `visualize()` format.
-Snapshots use the same PoppyGL renderer as the interactive viewer. Blue shows
+Snapshots use PoppyGL. The interactive view supports orbit, pan, zoom, axis views,
+fit/reset and copying a camera fixture, and preserves navigation across solver
+steps. Pass the copied fields to `visualize3d({ cameraPosition, cameraTarget })`
+to include them in the serializable output. The grouped fixture shares its authored
+camera with all three PoppyGL stage snapshots; camera settings stay outside the
+collision problem and algorithm. Blue shows
 moving solids, translucent gray shows stationary obstacles, and orange shows
 actual swept intersection volume. The movement guides are not collision samples.
 
