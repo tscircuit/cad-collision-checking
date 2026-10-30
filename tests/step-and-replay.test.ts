@@ -1,3 +1,4 @@
+import { getSolverSvg } from "./fixtures/get-solver-svg"
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { groupedProblem } from "./fixtures/problems"
@@ -21,5 +22,5 @@ test("stepping exposes progress and serializable constructor input replays witho
   expect(solver.progress).toBe(1)
   expect(solver.iterations).toBeGreaterThan(10)
   expect(JSON.stringify(problem)).toBe(original)
-  await expect(solver.visualize()).toMatchGraphicsSvg(import.meta.path)
+  await expect(getSolverSvg(solver)).toMatchSvgSnapshot(import.meta.path)
 })

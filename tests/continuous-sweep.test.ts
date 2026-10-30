@@ -1,3 +1,4 @@
+import { getSolverSvg } from "./fixtures/get-solver-svg"
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { thinWallProblem } from "./fixtures/problems"
@@ -17,5 +18,5 @@ test("continuous sweeps catch a thin obstacle between clear endpoints", async ()
   expect(
     solver.getOutput().collisions[0].sweptIntersectionVolumeMm3,
   ).toBeCloseTo(0.04, 5)
-  await expect(solver.visualize()).toMatchGraphicsSvg(import.meta.path)
+  await expect(getSolverSvg(solver)).toMatchSvgSnapshot(import.meta.path)
 })
