@@ -1,5 +1,8 @@
 import { BaseSolver } from "@tscircuit/solver-utils"
-import type { GraphicsObject } from "graphics-debug"
+import type {
+  GraphicsObject3d,
+  GraphicsCameraFixture3d,
+} from "@tscircuit/graphics-debug-3d"
 import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
 import { createCollisionSolid, serializeCollisionMesh } from "./collision-mesh"
 import { createTranslationSweep } from "./create-translation-sweep"
@@ -231,13 +234,16 @@ export class CadCollisionCheckingSolver extends BaseSolver {
     return { collisions: structuredClone(this.collisions) }
   }
 
-  override visualize(): GraphicsObject {
-    return visualizeCollisionProblem({
-      inputProblem: this.inputProblem,
-      offsets: this.offsets,
-      collisionMeshes: this.collisionMeshes,
-      moveIndex: this.moveIndex,
-    })
+  visualize3d(camera: GraphicsCameraFixture3d = {}): GraphicsObject3d {
+    return {
+      ...visualizeCollisionProblem({
+        inputProblem: this.inputProblem,
+        offsets: this.offsets,
+        collisionMeshes: this.collisionMeshes,
+        moveIndex: this.moveIndex,
+      }),
+      ...camera,
+    }
   }
 
   override tryFinalAcceptance() {

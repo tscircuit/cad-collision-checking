@@ -32,20 +32,26 @@
   "peerDependencies": {
     "@tscircuit/solver-utils": "*",
     "graphics-debug": "*",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@tscircuit/graphics-debug-3d": "*"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
-    "@tscircuit/solver-utils": "^0.0.23",
+    "@tscircuit/solver-utils": "https://pkg.pr.new/tscircuit/solver-utils/@tscircuit/solver-utils@803f229",
     "@types/bun": "^1.3.14",
     "@types/react": "^19.1.13",
-    "bun-match-svg": "^0.0.17",
     "graphics-debug": "^0.0.95",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-cosmos": "^7.0.0",
     "react-cosmos-plugin-vite": "^7.0.0",
     "typescript": "^5.9.3",
-    "vite": "^7.3.0"
+    "vite": "^7.3.0",
+    "@tscircuit/graphics-debug-3d": "github:tscircuit/graphics-debug-3d#f6354793d9edd48c74ad642423fcd51bbaff2ba3",
+    "fast-png": "^8.0.0",
+    "poppygl": "0.0.38"
+  },
+  "overrides": {
+    "@tscircuit/graphics-debug-3d": "github:tscircuit/graphics-debug-3d#f6354793d9edd48c74ad642423fcd51bbaff2ba3"
   }
 }

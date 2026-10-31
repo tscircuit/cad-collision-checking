@@ -2,10 +2,16 @@
 
 Continuous collision checking for CAD assembly translations, implemented as an
 iterative `BaseSolver` from `@tscircuit/solver-utils`. The solver accepts closed
-triangle meshes and ordered movements. It has no dependency on tscircuit/core,
-Circuit JSON, JSCAD, or a renderer.
+triangle meshes and ordered movements. Collision detection is independent of
+tscircuit/core, Circuit JSON, JSCAD and rendering. The optional visualization uses
+the scene types from `graphics-debug-3d`.
 
-![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.svg)
+![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
+
+The 3D integration in this branch depends on
+[graphics-debug-3d #1](https://github.com/tscircuit/graphics-debug-3d/pull/1) and
+[solver-utils #54](https://github.com/tscircuit/solver-utils/pull/54). The published
+0.0.1 release below has the original 2D debugger.
 
 ## Install
 
@@ -101,9 +107,25 @@ bun run build:site
 ```
 
 The fixtures use `GenericSolverDebugger`, with single-step/solve/animate controls,
-live stats, downloadable constructor inputs, and three orthographic views.
+live stats, downloadable constructor inputs, and a Three.js/OrbitControls 3D view.
 Orange geometry shows actual swept intersections. `getConstructorParams()`,
-`getOutput()`, `computeProgress()`, and `visualize()` follow solver-utils patterns.
+`getOutput()`, and `computeProgress()` follow solver-utils patterns.
+`visualize3d()` returns serializable `GraphicsObject3d` meshes, movement lines,
+labels, stable bounds, and optional `cameraPosition`/`cameraTarget`. The debugger uses the custom-renderer hook instead of
+projecting 3D geometry into the inherited 2D `visualize()` format.
+Snapshots use PoppyGL. The interactive view supports orbit, pan, zoom, axis views,
+fit/reset and copying a camera fixture, and preserves navigation across solver
+steps. Pass the copied fields to `visualize3d({ cameraPosition, cameraTarget })`
+to include them in the serializable output. The grouped fixture shares its authored
+camera with all three PoppyGL stage snapshots; camera settings stay outside the
+collision problem and algorithm. Blue shows
+moving solids, translucent gray shows stationary obstacles, and orange shows
+actual swept intersection volume. The movement guides are not collision samples.
+
+![Assembled pose](./tests/__snapshots__/stage-0-assembled.snap.png)
+![Cover and bolt lifted together](./tests/__snapshots__/stage-1-lift-cover-and-bolt.snap.png)
+![Bolt removed through the bracket](./tests/__snapshots__/stage-2-remove-bolt.snap.png)
+
 Each step prepares one solid, constructs a sweep, checks one candidate obstacle,
 or applies one target translation. Individual native geometry operations are
 synchronous. Call `dispose()` if abandoning an unfinished solver; completion and
