@@ -1,6 +1,6 @@
 {
   "name": "@tscircuit/cad-collision-checking",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Step-based continuous collision checking for CAD assembly movements",
   "type": "module",
   "module": "lib/index.ts",
