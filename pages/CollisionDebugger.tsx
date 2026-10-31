@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react"
 import { GenericSolverDebugger } from "@tscircuit/solver-utils/react"
 import { InteractiveGraphics3d } from "@tscircuit/graphics-debug-3d/react"
-import type { GraphicsCameraFixture3d } from "@tscircuit/graphics-debug-3d"
+import type {
+  GraphicsCameraFixture3d,
+  GraphicsObject3d,
+} from "@tscircuit/graphics-debug-3d"
 import {
   CadCollisionCheckingSolver,
   loadCollisionManifold,
@@ -12,9 +15,11 @@ import type { ManifoldToplevel } from "manifold-3d"
 export function CollisionDebugger({
   createProblem,
   camera,
+  visualize,
 }: {
   createProblem: (manifold: ManifoldToplevel) => CadCollisionProblem
   camera?: GraphicsCameraFixture3d
+  visualize?: (solver: CadCollisionCheckingSolver) => GraphicsObject3d
 }) {
   const [problem, setProblem] = useState<CadCollisionProblem>()
   const [error, setError] = useState<string>()
@@ -47,10 +52,17 @@ export function CollisionDebugger({
         name: "3D",
         render: () => (
           <InteractiveGraphics3d
-            graphics={solver.current!.visualize3d(camera)}
+            graphics={
+              visualize
+                ? visualize(solver.current!)
+                : solver.current!.visualize3d(camera)
+            }
           />
         ),
-        getDownload: () => solver.current!.visualize3d(camera),
+        getDownload: () =>
+          visualize
+            ? visualize(solver.current!)
+            : solver.current!.visualize3d(camera),
       }}
     />
   )
