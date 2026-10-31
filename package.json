@@ -37,7 +37,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
-    "@tscircuit/solver-utils": "https://pkg.pr.new/tscircuit/solver-utils/@tscircuit/solver-utils@803f229",
+    "@tscircuit/solver-utils": "^0.0.25",
     "@types/bun": "^1.3.14",
     "@types/react": "^19.1.13",
     "graphics-debug": "^0.0.95",
