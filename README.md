@@ -93,13 +93,50 @@ The caller owns model loading, tessellation, placement transforms, unsupported
 geometry warnings, and application-specific diagnostics. Core's adapter preserves
 its `cad_explosion_collision_error` and incomplete-check warnings. This library
 checks rigid translations of supplied meshes; rotations, flexible bodies,
-fasteners, and unprovided geometry are outside its coverage.
+thread engagement, and unprovided geometry are outside its coverage. Fastener
+meshes themselves, including modeled threads and sockets, are checked normally.
+
+## Real motor and fastener regression
+
+The NEMA17 fixture regenerates `nema17`, `hexbolt_m3_l4`, and `hexbolt_m3_l6`
+from pinned `modelprinter@0.0.35` and `jscad-electronics@0.0.242`. It imports
+closed triangle meshes through the shared `geom3ToIndexedMesh` conversion,
+including the motor's shaft, wires, rear screws, blind mounting holes, and the
+bolts' helical threads. The M3 × 4 bolt has over 42,000 triangles. Bounding boxes
+only reject distant pairs; the narrow phase checks continuous mesh sweeps.
+No whole-part boxes, convex hulls, mesh decimation, or time sampling replace
+these models.
+
+![Four threaded M3 bolts above the NEMA17 mounting holes](./tests/__snapshots__/nema17-m3-before-insertion.snap.png)
+![Bolts inserted into all four clearance bores](./tests/__snapshots__/nema17-m3-inserted.snap.png)
+
+The stock motor models **smooth 3 mm bores**, not internal threads or a specified
+manufacturing tolerance. The M3 bolt's major diameter is also 3 mm. JSCAD boolean
+snapping and mesh tessellation introduce microscopic overlaps in this nominal
+zero-clearance pair. A dedicated test preserves this diagnostic (less than
+0.005 mm³ of newly swept intersection); it is not silently treated as a fit.
+
+The separate fit variant explicitly sets `mountingHoleDiameter: 3.02`, giving
+10 µm nominal radial clearance. All four threaded bolts fit, a 5 µm lateral
+offset still clears, and a 20 µm offset collides with the bore wall. Other tests
+move the motor around stationary bolts in a rotated scene, detect collisions
+between clear endpoint poses, and verify an M3 × 6 bolt strikes the 4.5 mm blind
+hole floor while its head stays above the mounting face. These are rigid mesh
+clearance checks, not a simulation of screwing into a tapped hole.
+
+![Long bolt intersects the blind hole floor in orange](./tests/__snapshots__/nema17-m3-blind-hole-floor.snap.png)
+
+Select **nema17-m3** in the debugger to switch between fit, wall, floor, and
+stock-model cases. Close-ups section the actual motor mesh **for display only**;
+the collision solver always receives the complete motor. PoppyGL snapshots and
+the interactive view share the same camera fixtures. Full threaded-mesh sweeps
+are synchronous and take several seconds per bolt.
 
 ## Debug and test
 
 ```sh
 bun install
-bun run start       # React Cosmos: thin wall, grouped movement, bore clearance
+bun run start       # React Cosmos: thin wall, grouped movement, bores, NEMA17/M3
 bun test
 bun run typecheck
 bun run format:check

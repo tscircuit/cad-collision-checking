@@ -37,19 +37,22 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
+    "@jscad/modeling": "2.13.0",
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz",
+    "@tscircuit/modelprinter": "0.0.35",
     "@tscircuit/solver-utils": "^0.0.25",
     "@types/bun": "^1.3.14",
     "@types/react": "^19.1.13",
+    "fast-png": "^8.0.0",
     "graphics-debug": "^0.0.95",
+    "jscad-electronics": "0.0.242",
+    "poppygl": "0.0.38",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1",
     "react-cosmos": "^7.0.0",
     "react-cosmos-plugin-vite": "^7.0.0",
+    "react-dom": "^19.1.1",
     "typescript": "^5.9.3",
-    "vite": "^7.3.0",
-    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz",
-    "fast-png": "^8.0.0",
-    "poppygl": "0.0.38"
+    "vite": "^7.3.0"
   },
   "overrides": {
     "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
