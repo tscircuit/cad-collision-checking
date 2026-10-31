@@ -47,11 +47,11 @@
     "react-cosmos-plugin-vite": "^7.0.0",
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
-    "@tscircuit/graphics-debug-3d": "github:tscircuit/graphics-debug-3d#f6354793d9edd48c74ad642423fcd51bbaff2ba3",
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz",
     "fast-png": "^8.0.0",
     "poppygl": "0.0.38"
   },
   "overrides": {
-    "@tscircuit/graphics-debug-3d": "github:tscircuit/graphics-debug-3d#f6354793d9edd48c74ad642423fcd51bbaff2ba3"
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
   }
 }

@@ -8,15 +8,16 @@ the scene types from `graphics-debug-3d`.
 
 ![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
 
-The 3D integration in this branch depends on
-[graphics-debug-3d #1](https://github.com/tscircuit/graphics-debug-3d/pull/1) and
-[solver-utils #54](https://github.com/tscircuit/solver-utils/pull/54). The published
-0.0.1 release below has the original 2D debugger.
+Version 0.0.2 includes 3D visualization output and PoppyGL snapshots, using
+`graphics-debug-3d@0.0.1`. The interactive fixtures still use the review build of
+[solver-utils #54](https://github.com/tscircuit/solver-utils/pull/54) until its
+custom-renderer hook is released.
 
 ## Install
 
 ```sh
-bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.1.tgz
+bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.2.tgz
+bun add https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz
 bun add @tscircuit/solver-utils graphics-debug
 ```
 
