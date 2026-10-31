@@ -67,6 +67,13 @@ export class CadCollisionCheckingSolver extends BaseSolver {
     this.refreshStats()
   }
 
+  override step() {
+    super.step()
+    if (this.failed || this.solved) {
+      this.dispose()
+    }
+  }
+
   override _step() {
     try {
       this.advance()
@@ -95,7 +102,7 @@ export class CadCollisionCheckingSolver extends BaseSolver {
       return
     }
     const movingSolidIds = [...new Set(move.solidIds)]
-    if (!Math.hypot(...move.translation)) {
+    if (!Math.hypot(...move.translation) || !movingSolidIds.length) {
       this.moveIndex++
       return
     }
