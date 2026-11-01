@@ -7,3 +7,5 @@ index.html
 bun.lock
 bun.lockb
 *.diff.png
+*.actual.png
+results/
