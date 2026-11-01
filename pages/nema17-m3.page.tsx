@@ -58,8 +58,8 @@ export default function Nema17M3Debugger() {
           {scenario === "fit"
             ? "All four mounting holes are checked."
             : "The cutaway is for viewing only; collision checks use the entire motor."}{" "}
-          Orange shows swept interference. Each continuous mesh sweep can take
-          several seconds.
+          Orange shows swept interference. Clear paths are pruned before the
+          detailed sweep; complex interference can still take several seconds.
         </p>
       </div>
       <CollisionDebugger

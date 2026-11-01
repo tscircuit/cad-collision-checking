@@ -77,6 +77,11 @@ replayed after initialization without serializing a WASM module.
 - Leading mesh triangles sweep prisms whose union covers the continuous path.
   Holes and concavities remain intact; this is not endpoint sampling or a convex
   hull of the whole part.
+- Before constructing the prisms, crop each obstacle to the swept bounds and
+  intersect it with a conservative convex envelope of the relevant triangles.
+  An empty intersection rules out the pair. Otherwise, build only the original
+  triangle prisms that can reach the remaining collision regions. The envelope
+  never establishes a collision by itself; reported volumes use the exact meshes.
 - Only newly occupied space is checked. The solid's starting occupied space is
   subtracted for each movement, allowing an existing overlap to separate while
   detecting movement deeper into an obstacle.
@@ -103,7 +108,8 @@ from pinned `modelprinter@0.0.35` and `jscad-electronics@0.0.242`. It imports
 closed triangle meshes through the shared `geom3ToIndexedMesh` conversion,
 including the motor's shaft, wires, rear screws, blind mounting holes, and the
 bolts' helical threads. The M3 × 4 bolt has over 42,000 triangles. Bounding boxes
-only reject distant pairs; the narrow phase checks continuous mesh sweeps.
+and conservative envelopes reject irrelevant swept geometry; the narrow phase
+checks continuous mesh sweeps.
 No whole-part boxes, convex hulls, mesh decimation, or time sampling replace
 these models.
 
@@ -129,8 +135,9 @@ clearance checks, not a simulation of screwing into a tapped hole.
 Select **nema17-m3** in the debugger to switch between fit, wall, floor, and
 stock-model cases. Close-ups section the actual motor mesh **for display only**;
 the collision solver always receives the complete motor. PoppyGL snapshots and
-the interactive view share the same camera fixtures. Full threaded-mesh sweeps
-are synchronous and take several seconds per bolt.
+the interactive view share the same camera fixtures. Clear paths avoid the
+expensive union of individual triangle prisms. Native operations remain
+synchronous; complex interference can still take several seconds.
 
 ## Debug and test
 
@@ -141,6 +148,9 @@ bun test
 bun run typecheck
 bun run format:check
 bun run build:site
+./benchmark.sh                 # Complete real-mesh dataset, timings and work counts
+./benchmark.sh --sample 4 --snapshots
+./benchmark.sh --limit 2 --repeat 3
 ```
 
 The fixtures use `GenericSolverDebugger`, with single-step/solve/animate controls,
@@ -163,10 +173,19 @@ actual swept intersection volume. The movement guides are not collision samples.
 ![Cover and bolt lifted together](./tests/__snapshots__/stage-1-lift-cover-and-bolt.snap.png)
 ![Bolt removed through the bracket](./tests/__snapshots__/stage-2-remove-bolt.snap.png)
 
-Each step prepares one solid, constructs a sweep, checks one candidate obstacle,
+Each step prepares one solid, collects sweep triangles, checks one candidate obstacle,
 or applies one target translation. Individual native geometry operations are
 synchronous. Call `dispose()` if abandoning an unfinished solver; completion and
 failure release native solids automatically.
+
+The benchmark follows the handbook's `benchmark.sh` conventions. Timings include
+solver construction and solving, excluding model generation, WASM loading and
+optional PoppyGL renders. It writes incremental logs and JSON metrics under
+`results/runNNN/`, with average, P50 and P95 durations. Solver stats expose
+`sweptTriangles` (leading triangles examined across candidate pairs) and
+`constructedPrisms` (the subset requiring exact CSG). Tests compare pruned sweeps
+with the original unpruned algorithm on rotated, hollow and disconnected meshes,
+including spatial volume comparisons, containment and existing overlaps.
 
 This repository was provisioned through
 [tscircuit/create-repo #103](https://github.com/tscircuit/create-repo/pull/103)

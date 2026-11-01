@@ -11,5 +11,12 @@
     "types": ["bun"],
     "paths": { "lib/*": ["./lib/*"], "tests/*": ["./tests/*"] }
   },
-  "include": ["lib", "tests", "pages", "vite.config.ts", "cosmos.decorator.tsx"]
+  "include": [
+    "lib",
+    "tests",
+    "pages",
+    "benchmarking",
+    "vite.config.ts",
+    "cosmos.decorator.tsx"
+  ]
 }

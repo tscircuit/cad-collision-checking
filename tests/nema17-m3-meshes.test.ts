@@ -69,6 +69,10 @@ test("all four threaded M3 bolts fit through overlapping bounds into the real mo
     expect(solver.solved).toBe(true)
     // Every bolt reaches the mesh narrow phase despite overlapping motor AABBs.
     expect(solver.stats.checkedPairs).toBe(4)
+    // Deterministic work regression: clear paths must avoid the expensive
+    // per-triangle CSG union, while still examining the full threaded meshes.
+    expect(solver.stats.sweptTriangles).toBeGreaterThan(70000)
+    expect(solver.stats.constructedPrisms).toBe(0)
     expect(solver.getOutput().collisions).toEqual([])
     expect(
       await renderGraphics3dToPng(getNema17Graphics(solver), {
