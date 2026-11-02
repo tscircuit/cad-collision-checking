@@ -9,6 +9,7 @@ import type {
   CadCollisionProblem,
   CollisionMesh,
   CollisionSolidId,
+  CadCollision,
 } from "./types"
 
 function meshPositions(mesh: CollisionMesh): number[] {
@@ -35,6 +36,7 @@ export function visualizeCollisionProblem({
   inputProblem,
   offsets,
   collisionMeshes,
+  collisions,
   moveIndex,
   solved,
   failed,
@@ -42,6 +44,7 @@ export function visualizeCollisionProblem({
   inputProblem: CadCollisionProblem
   offsets: Map<CollisionSolidId, Vec3>
   collisionMeshes: CollisionMesh[]
+  collisions: CadCollision[]
   moveIndex: number
   solved: boolean
   failed: boolean
@@ -71,7 +74,17 @@ export function visualizeCollisionProblem({
         ? "NO COLLISION DETECTED"
         : "CHECK NOT COMPLETE"
   const graphics: GraphicsObject3d = {
-    title: `${status} — ${progress}`,
+    title: `${status} — ${progress}${collisions
+      .map((collision) => {
+        const moving = inputProblem.solids.find(
+          (solid) => solid.solidId === collision.movingSolidId,
+        )!
+        const obstacle = inputProblem.solids.find(
+          (solid) => solid.solidId === collision.obstacleSolidId,
+        )!
+        return ` — ${moving.name} / ${obstacle.name}: ${Number(collision.sweptIntersectionVolumeMm3.toPrecision(5))} mm³ new swept intersection`
+      })
+      .join("")}`,
     bounds: getProblemBounds(inputProblem),
     meshes,
     lines: [],

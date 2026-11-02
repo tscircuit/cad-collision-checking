@@ -28,8 +28,9 @@ export async function renderNema17Snapshot(
   const intersections = graphics.meshes!.filter((mesh) =>
     mesh.id?.startsWith("intersection-"),
   )
+  const collisions = solver.solved ? solver.getOutput().collisions : []
   const collisionCount = solver.solved
-    ? solver.getOutput().collisions.length
+    ? collisions.length
     : intersections.length
   const status = solver.failed
     ? "CHECK INCOMPLETE"
@@ -43,7 +44,24 @@ export async function renderNema17Snapshot(
     : solver.solved
       ? "#166534"
       : "#92400e"
-  const headerHeight = 104
+  const volumeLines = collisions.length
+    ? collisions.map((collision) => {
+        const moving = solver.inputProblem.solids.find(
+          (solid) => solid.solidId === collision.movingSolidId,
+        )!
+        const obstacle = solver.inputProblem.solids.find(
+          (solid) => solid.solidId === collision.obstacleSolidId,
+        )!
+        return `${moving.name} / ${obstacle.name}: ${Number(collision.sweptIntersectionVolumeMm3.toPrecision(5))} mm³ (swept)`
+      })
+    : [
+        solver.solved
+          ? "New swept intersection: 0 mm³ in checked movement"
+          : "Volume pending — checking has not completed",
+      ]
+  const headerHeight = 104 + volumeLines.length * 24
+  const imageBottom = headerHeight + 600
+  const height = imageBottom + 108
   let callout = ""
   if (intersections.length) {
     // Pick the real interference vertex nearest the authored camera so the
@@ -76,18 +94,20 @@ export async function renderNema17Snapshot(
       <rect x="${labelX}" y="${labelY - 29}" width="144" height="29" rx="4" fill="#b91c1c"/>
       <text x="${labelX + 12}" y="${labelY - 9}" fill="white" font-size="15">INTERFERENCE</text>`
   }
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="786" viewBox="0 0 800 786">
-    <rect width="800" height="786" fill="#f7f9fc"/>
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="${height}" viewBox="0 0 800 ${height}">
+    <rect width="800" height="${height}" fill="#f7f9fc"/>
     <g font-family="Roboto Mono">
       <rect width="800" height="48" fill="${statusColor}"/>
       <text x="22" y="32" fill="white" font-size="23">${escapeXml(status)}</text>
       <text x="22" y="77" fill="#0f172a" font-size="18">${escapeXml(title)}</text>
+      ${volumeLines.map((line, index) => `<text x="22" y="${103 + index * 24}" fill="${statusColor}" font-size="14">${escapeXml(line)}</text>`).join("")}
       <image x="0" y="${headerHeight}" width="800" height="600" href="data:image/png;base64,${Buffer.from(png).toString("base64")}"/>
       ${callout}
-      <rect x="0" y="704" width="800" height="82" fill="white"/>
-      <rect x="22" y="720" width="15" height="15" fill="#f97316"/>
-      <text x="48" y="733" fill="#0f172a" font-size="16">Orange = actual new swept interference</text>
-      <text x="22" y="764" fill="#475569" font-size="14">${!solver.solved ? "Real NEMA17 and threaded M3 meshes; checking has not completed." : cutaway ? "Motor sectioned for viewing; the full motor is collision-checked." : "Real NEMA17 and threaded M3 meshes; the complete path is checked."}</text>
+      <rect x="0" y="${imageBottom}" width="800" height="108" fill="white"/>
+      <rect x="22" y="${imageBottom + 16}" width="15" height="15" fill="#f97316"/>
+      <text x="48" y="${imageBottom + 29}" fill="#0f172a" font-size="16">Orange = actual new swept interference</text>
+      <text x="22" y="${imageBottom + 60}" fill="#475569" font-size="14">${!solver.solved ? "Real NEMA17 and threaded M3 meshes; checking has not completed." : cutaway ? "Motor sectioned for viewing; the full motor is collision-checked." : "Real NEMA17 and threaded M3 meshes; the complete path is checked."}</text>
+      <text x="22" y="${imageBottom + 86}" fill="#475569" font-size="14">Volume is over the movement, not overlap at this displayed pose.</text>
     </g>
   </svg>`
   return new Resvg(svg, {

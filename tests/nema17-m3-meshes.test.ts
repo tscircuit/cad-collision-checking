@@ -51,6 +51,24 @@ test("published modelprinter models retain real threads, blind holes and closed 
       solid.delete()
     }
   }
+  // Measure the actual stock mesh: all four bores are open, approximately
+  // 3 mm across and 4.5 mm deep. Rays use motor-local mm, +Z out of its face.
+  const motor = createCollisionSolid(
+    getModelMesh("nominal-motor", manifold),
+    manifold,
+  )
+  try {
+    for (const [x, y] of mountingHoles) {
+      const floor = motor.rayCast([x, y, 1], [x, y, -6])
+      expect(floor).toHaveLength(1)
+      expect(floor[0].position[2]).toBeCloseTo(-4.5, 3)
+      const walls = motor.rayCast([x - 2, y, -2], [x + 2, y, -2])
+      expect(walls).toHaveLength(2)
+      expect(walls[1].position[0] - walls[0].position[0]).toBeCloseTo(3, 3)
+    }
+  } finally {
+    motor.delete()
+  }
 })
 
 test("all four threaded M3 bolts fit through overlapping bounds into the real motor's clearance bores", async () => {
@@ -282,6 +300,9 @@ test("stock zero-clearance models expose their sub-micron surface overlap rather
     const volume = solver.getOutput().collisions[0].sweptIntersectionVolumeMm3
     expect(volume).toBeGreaterThan(0)
     expect(volume).toBeLessThan(0.005)
+    expect(solver.visualize3d().title).toContain(
+      `${Number(volume.toPrecision(5))} mm³ new swept intersection`,
+    )
   } finally {
     solver.dispose()
   }

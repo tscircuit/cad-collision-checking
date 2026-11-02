@@ -172,6 +172,9 @@ Visual snapshots and interactive fixtures use the real NEMA17 and threaded M3
 models. Every snapshot states **not checked**, **no collision detected**, or
 **collision detected**, derived from the solver's actual result. Collision
 snapshots show the orange swept intersection and a callout anchored to that mesh.
+Snapshots and the debugger name each colliding pair and report its new swept
+intersection volume in mm³. This measures interference over the movement, not
+instantaneous overlap at the displayed pose.
 Synthetic boxes/cylinders remain in numerical regression tests only.
 
 Each step prepares one solid, collects sweep triangles, checks one candidate obstacle,
