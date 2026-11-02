@@ -237,6 +237,8 @@ export class CadCollisionCheckingSolver extends BaseSolver {
         offsets: this.offsets,
         collisionMeshes: this.collisionMeshes,
         moveIndex: this.moveIndex,
+        solved: this.solved,
+        failed: this.failed,
       }),
       ...camera,
     }

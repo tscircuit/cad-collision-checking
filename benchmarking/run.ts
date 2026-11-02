@@ -147,20 +147,15 @@ for (const [index, entry] of cases.entries()) {
         `${JSON.stringify(metrics, null, 2)}\n`,
       )
       if (values.snapshots && repetition === 1) {
-        const { renderGraphics3dToPng } = await import(
-          "@tscircuit/graphics-debug-3d"
+        const { renderNema17Snapshot } = await import(
+          "../tests/fixtures/render-nema17-snapshot"
         )
-        const { getNema17Graphics } = await import(
-          "../tests/fixtures/nema17-graphics"
-        )
-        const png = await renderGraphics3dToPng(
-          getNema17Graphics(
-            solver,
+        const png = await renderNema17Snapshot(solver, {
+          title: `NEMA17 / threaded M3: ${entry.name}`,
+          cutaway:
             problem.moves[0].solidIds.length === 1 &&
-              entry.name !== "moving motor",
-          ),
-          { width: 800, height: 600, supersampling: 2 },
-        )
+            entry.name !== "moving motor",
+        })
         await writeFile(join(directory, `${id}.png`), png)
       }
     } finally {

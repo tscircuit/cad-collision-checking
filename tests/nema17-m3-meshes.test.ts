@@ -10,8 +10,7 @@ import {
   nema17InsertionProblem,
   translatedMesh,
 } from "./fixtures/nema17-models"
-import { renderGraphics3dToPng } from "@tscircuit/graphics-debug-3d"
-import { getNema17Graphics } from "./fixtures/nema17-graphics"
+import { renderNema17Snapshot } from "./fixtures/render-nema17-snapshot"
 
 let manifold: ManifoldToplevel
 beforeAll(async () => {
@@ -59,10 +58,8 @@ test("all four threaded M3 bolts fit through overlapping bounds into the real mo
   const solver = new CadCollisionCheckingSolver(problem)
   try {
     expect(
-      await renderGraphics3dToPng(getNema17Graphics(solver), {
-        width: 800,
-        height: 600,
-        supersampling: 2,
+      await renderNema17Snapshot(solver, {
+        title: "NEMA17 + four threaded M3 x 4 bolts: before insertion",
       }),
     ).toMatchPngSnapshot(import.meta.path, "nema17-m3-before-insertion")
     solver.solve()
@@ -74,11 +71,10 @@ test("all four threaded M3 bolts fit through overlapping bounds into the real mo
     expect(solver.stats.sweptTriangles).toBeGreaterThan(70000)
     expect(solver.stats.constructedPrisms).toBe(0)
     expect(solver.getOutput().collisions).toEqual([])
+    expect(solver.visualize3d().title).toContain("NO COLLISION DETECTED")
     expect(
-      await renderGraphics3dToPng(getNema17Graphics(solver), {
-        width: 800,
-        height: 600,
-        supersampling: 2,
+      await renderNema17Snapshot(solver, {
+        title: "Four M3 x 4 bolts fit in the 3.02 mm motor bores",
       }),
     ).toMatchPngSnapshot(import.meta.path, "nema17-m3-inserted")
   } finally {
@@ -226,10 +222,9 @@ test("20 µm misalignment catches the bore wall, not just gross bounding-box ove
       solver.getOutput().collisions[0].sweptIntersectionVolumeMm3,
     ).toBeGreaterThan(0.01)
     expect(
-      await renderGraphics3dToPng(getNema17Graphics(solver, true), {
-        width: 800,
-        height: 600,
-        supersampling: 2,
+      await renderNema17Snapshot(solver, {
+        title: "M3 x 4: 20 micrometre offset hits the bore wall",
+        cutaway: true,
       }),
     ).toMatchPngSnapshot(import.meta.path, "nema17-m3-misaligned")
   } finally {
@@ -264,10 +259,9 @@ test("a long M3 bolt strikes the blind hole floor while its head remains above t
     expect(Math.max(...z)).toBeLessThan(-4.49)
     expect(Math.min(...z)).toBeLessThan(-5.8)
     expect(
-      await renderGraphics3dToPng(getNema17Graphics(solver, true), {
-        width: 800,
-        height: 600,
-        supersampling: 2,
+      await renderNema17Snapshot(solver, {
+        title: "M3 x 6: bolt crosses the blind-hole floor",
+        cutaway: true,
       }),
     ).toMatchPngSnapshot(import.meta.path, "nema17-m3-blind-hole-floor")
   } finally {

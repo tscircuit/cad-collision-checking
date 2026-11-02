@@ -36,11 +36,15 @@ export function visualizeCollisionProblem({
   offsets,
   collisionMeshes,
   moveIndex,
+  solved,
+  failed,
 }: {
   inputProblem: CadCollisionProblem
   offsets: Map<CollisionSolidId, Vec3>
   collisionMeshes: CollisionMesh[]
   moveIndex: number
+  solved: boolean
+  failed: boolean
 }): GraphicsObject3d {
   const movingIds = new Set(inputProblem.moves.flatMap((move) => move.solidIds))
   const meshes: GraphicsMesh3d[] = inputProblem.solids.map((solid) => ({
@@ -58,8 +62,16 @@ export function visualizeCollisionProblem({
       indices: [...mesh.triVerts],
       color: "#f97316",
     })
+  const progress = `${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves checked`
+  const status = failed
+    ? "CHECK INCOMPLETE"
+    : collisionMeshes.length
+      ? `COLLISION DETECTED: ${collisionMeshes.length} pair(s)`
+      : solved
+        ? "NO COLLISION DETECTED"
+        : "CHECK NOT COMPLETE"
   const graphics: GraphicsObject3d = {
-    title: `${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves checked - ${collisionMeshes.length} collision(s)`,
+    title: `${status} — ${progress}`,
     bounds: getProblemBounds(inputProblem),
     meshes,
     lines: [],

@@ -1,20 +1,15 @@
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { groupedProblem } from "./fixtures/problems"
-import { getSolverPng } from "./fixtures/get-solver-png"
 import { groupedCamera } from "./fixtures/grouped-camera"
 
-test("PoppyGL snapshots show the assembled pose, grouped lift and separate bolt removal", async () => {
+test("stage progression retains group offsets, collision meshes and the authored camera", async () => {
   const solver = new CadCollisionCheckingSolver(
     groupedProblem(await loadCollisionManifold()),
   )
   const assembled = solver.visualize3d(groupedCamera)
   expect(assembled.cameraPosition).toEqual(groupedCamera.cameraPosition)
   expect(assembled.cameraTarget).toEqual(groupedCamera.cameraTarget)
-  expect(await getSolverPng(solver, groupedCamera)).toMatchPngSnapshot(
-    import.meta.path,
-    "stage-0-assembled",
-  )
   while (solver.stats.completedMoves < 1) solver.step()
   const lifted = solver.visualize3d(groupedCamera)
   expect(lifted.meshes!.find((mesh) => mesh.id === "COVER")!.position).toEqual([
@@ -25,10 +20,6 @@ test("PoppyGL snapshots show the assembled pose, grouped lift and separate bolt 
   ])
   expect(lifted.bounds).toEqual(assembled.bounds)
   expect(lifted.cameraPosition).toEqual(assembled.cameraPosition)
-  expect(await getSolverPng(solver, groupedCamera)).toMatchPngSnapshot(
-    import.meta.path,
-    "stage-1-lift-cover-and-bolt",
-  )
   solver.solve()
   const removed = solver.visualize3d(groupedCamera)
   expect(removed.meshes!.find((mesh) => mesh.id === "BOLT")!.position).toEqual([
@@ -39,8 +30,4 @@ test("PoppyGL snapshots show the assembled pose, grouped lift and separate bolt 
   )
   expect(removed.bounds).toEqual(assembled.bounds)
   expect(removed.cameraPosition).toEqual(assembled.cameraPosition)
-  expect(await getSolverPng(solver, groupedCamera)).toMatchPngSnapshot(
-    import.meta.path,
-    "stage-2-remove-bolt",
-  )
 })

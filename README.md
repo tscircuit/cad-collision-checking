@@ -6,7 +6,7 @@ triangle meshes and ordered movements. Collision detection is independent of
 tscircuit/core, Circuit JSON, JSCAD and rendering. The optional visualization uses
 the scene types from `graphics-debug-3d`.
 
-![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
+![Real threaded M3 bolt colliding with a NEMA17 blind-hole floor](./tests/__snapshots__/nema17-m3-blind-hole-floor.snap.png)
 
 The 3D visualization uses released `graphics-debug-3d@0.0.1` for PoppyGL
 snapshots and interactive navigation, with the custom-renderer hook from
@@ -15,7 +15,7 @@ snapshots and interactive navigation, with the custom-renderer hook from
 ## Install
 
 ```sh
-bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.3.tgz
+bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.4.tgz
 bun add https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz
 bun add @tscircuit/solver-utils graphics-debug
 ```
@@ -143,7 +143,7 @@ synchronous; complex interference can still take several seconds.
 
 ```sh
 bun install
-bun run start       # React Cosmos: thin wall, grouped movement, bores, NEMA17/M3
+bun run start       # React Cosmos: real NEMA17 / threaded M3 models
 bun test
 bun run typecheck
 bun run format:check
@@ -163,15 +163,16 @@ projecting 3D geometry into the inherited 2D `visualize()` format.
 Snapshots use PoppyGL. The interactive view supports orbit, pan, zoom, axis views,
 fit/reset and copying a camera fixture, and preserves navigation across solver
 steps. Pass the copied fields to `visualize3d({ cameraPosition, cameraTarget })`
-to include them in the serializable output. The grouped fixture shares its authored
-camera with all three PoppyGL stage snapshots; camera settings stay outside the
+to include them in the serializable output. Camera settings stay outside the
 collision problem and algorithm. Blue shows
 moving solids, translucent gray shows stationary obstacles, and orange shows
 actual swept intersection volume. The movement guides are not collision samples.
 
-![Assembled pose](./tests/__snapshots__/stage-0-assembled.snap.png)
-![Cover and bolt lifted together](./tests/__snapshots__/stage-1-lift-cover-and-bolt.snap.png)
-![Bolt removed through the bracket](./tests/__snapshots__/stage-2-remove-bolt.snap.png)
+Visual snapshots and interactive fixtures use the real NEMA17 and threaded M3
+models. Every snapshot states **not checked**, **no collision detected**, or
+**collision detected**, derived from the solver's actual result. Collision
+snapshots show the orange swept intersection and a callout anchored to that mesh.
+Synthetic boxes/cylinders remain in numerical regression tests only.
 
 Each step prepares one solid, collects sweep triangles, checks one candidate obstacle,
 or applies one target translation. Individual native geometry operations are
