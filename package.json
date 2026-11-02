@@ -28,15 +28,13 @@
     "test:browser": "playwright test",
     "test:package": "bun scripts/check-package-install.ts"
   },
-  "dependencies": {
-    "@tscircuit/jscad": "0.0.6",
-    "@tscircuit/manifold-2d": "^0.0.8",
-    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
-  },
   "peerDependencies": {
     "@tscircuit/solver-utils": "*",
     "graphics-debug": "*",
-    "typescript": "^5"
+    "typescript": "^5",
+    "@tscircuit/jscad": "*",
+    "@tscircuit/manifold-2d": "*",
+    "@tscircuit/graphics-debug-3d": "*"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
@@ -58,6 +56,12 @@
     "typescript": "^5.9.3",
     "vite": "^7.3.0",
     "@playwright/test": "^1.61.1",
-    "esbuild": "^0.28.1"
+    "esbuild": "^0.28.1",
+    "@tscircuit/jscad": "0.0.6",
+    "@tscircuit/manifold-2d": "^0.0.8",
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
+  },
+  "overrides": {
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
   }
 }

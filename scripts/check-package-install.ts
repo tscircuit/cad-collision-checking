@@ -4,8 +4,9 @@ import { mkdtemp, mkdir, readFile, rm, writeFile } from "node:fs/promises"
 import { tmpdir } from "node:os"
 import { join, resolve } from "node:path"
 
-// Install the published files outside the checkout: repository overrides and
-// development dependencies must not be needed to consume the package.
+// Model core/eval: the consuming project supplies concrete development versions
+// for peers, plus root overrides for Bun. Install outside the checkout so the
+// existing workspace cannot hide missing peer declarations or resolution errors.
 const root = resolve(import.meta.dir, "..")
 const directory = await mkdtemp(join(tmpdir(), "collision-package-"))
 const run = async (command: string[], cwd: string) => {
@@ -21,25 +22,43 @@ try {
   const consumerDirectory = join(directory, "consumer")
   await mkdir(packDirectory)
   await mkdir(consumerDirectory)
-  const { version } = JSON.parse(
+  const manifest = JSON.parse(
     await readFile(join(root, "package.json"), "utf8"),
   )
+  assert.equal(manifest.dependencies, undefined)
+  const peerVersions: Record<string, string> = {}
+  for (const [name, range] of Object.entries(manifest.peerDependencies)) {
+    if (name !== "typescript") assert.equal(range, "*")
+    assert(
+      manifest.devDependencies[name],
+      `Missing development version for ${name}`,
+    )
+    peerVersions[name] = manifest.devDependencies[name]
+  }
   await run(
     ["npm", "pack", "--ignore-scripts", "--pack-destination", packDirectory],
     root,
   )
   await writeFile(
     join(consumerDirectory, "package.json"),
-    JSON.stringify({ private: true, type: "module" }),
+    JSON.stringify({
+      private: true,
+      type: "module",
+      devDependencies: peerVersions,
+    }),
   )
   await run(
     [
       "npm",
       "install",
+      "--save-dev",
       "--ignore-scripts",
       "--no-audit",
       "--no-fund",
-      join(packDirectory, `tscircuit-cad-collision-checking-${version}.tgz`),
+      join(
+        packDirectory,
+        `tscircuit-cad-collision-checking-${manifest.version}.tgz`,
+      ),
     ],
     consumerDirectory,
   )
@@ -115,6 +134,32 @@ try {
     "Type-only debugger dependencies must not enter the solver runtime bundle",
   )
   await run(["node", "check.mjs"], directory)
+
+  const bunConsumerDirectory = join(directory, "bun-consumer")
+  await mkdir(bunConsumerDirectory)
+  await writeFile(
+    join(bunConsumerDirectory, "package.json"),
+    JSON.stringify({
+      private: true,
+      type: "module",
+      devDependencies: {
+        ...peerVersions,
+        [manifest.name]: `file:${join(packDirectory, `tscircuit-cad-collision-checking-${manifest.version}.tgz`)}`,
+      },
+      overrides: manifest.overrides,
+    }),
+  )
+  await run(
+    [process.execPath, "install", "--ignore-scripts"],
+    bunConsumerDirectory,
+  )
+  for (const filename of ["check.ts", "runtime-smoke.ts", "problems.ts"]) {
+    await writeFile(
+      join(bunConsumerDirectory, filename),
+      await readFile(join(consumerDirectory, filename)),
+    )
+  }
+  await run([process.execPath, "check.ts"], bunConsumerDirectory)
 } finally {
   await rm(directory, { recursive: true, force: true })
 }
