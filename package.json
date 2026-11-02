@@ -25,23 +25,23 @@
     "format:check": "biome format .",
     "start": "cosmos",
     "build:site": "cosmos-export",
-    "test:browser": "playwright test"
+    "test:browser": "playwright test",
+    "test:package": "bun scripts/check-package-install.ts"
   },
   "dependencies": {
     "@tscircuit/jscad": "0.0.6",
-    "@tscircuit/manifold-2d": "^0.0.8"
+    "@tscircuit/manifold-2d": "^0.0.8",
+    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
   },
   "peerDependencies": {
     "@tscircuit/solver-utils": "*",
     "graphics-debug": "*",
-    "typescript": "^5",
-    "@tscircuit/graphics-debug-3d": "*"
+    "typescript": "^5"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.2.4",
     "@jscad/modeling": "2.13.0",
     "@resvg/resvg-js": "2.6.2",
-    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz",
     "@tscircuit/modelprinter": "0.0.35",
     "@tscircuit/solver-utils": "^0.0.25",
     "@types/bun": "^1.3.14",
@@ -59,8 +59,5 @@
     "vite": "^7.3.0",
     "@playwright/test": "^1.61.1",
     "esbuild": "^0.28.1"
-  },
-  "overrides": {
-    "@tscircuit/graphics-debug-3d": "https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz"
   }
 }
