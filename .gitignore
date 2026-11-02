@@ -9,3 +9,5 @@ bun.lockb
 *.diff.png
 *.actual.png
 results/
+test-results/
+playwright-report/

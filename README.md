@@ -22,7 +22,8 @@ bun add @tscircuit/solver-utils graphics-debug
 
 The package ships TypeScript source following the handbook's source-package
 convention. GitHub Packages releases are available through jscdn; consumers such
-as core bundle the library. Manifold 3.5.4 supplies the geometry kernel.
+as core bundle the library. `@tscircuit/manifold-2d` supplies the full 3D geometry
+kernel through the same runtime used by the copper-pour solver.
 
 ## Use
 
@@ -63,11 +64,13 @@ giving the vertex stride (the first three properties are XYZ points). Optional
 Use `serializeCollisionMesh(manifoldSolid)` to copy a borrowed Manifold solid.
 The solver copies its input and never changes caller-owned geometry.
 
-`loadCollisionManifold()` loads the installed WASM package in Node/Bun and pinned
-jsDelivr assets in browsers. Await it before constructing a solver. Alternatively,
-pass an initialized module as the second argument, `{ manifold }`, for custom
-hosting. Downloaded constructor inputs contain only the problem, so they can be
-replayed after initialization without serializing a WASM module.
+`loadCollisionManifold()` lazily initializes the shared runtime. Its embedded
+WASM works in Node, browser and blob-worker bundles without a CDN download or a
+separate WASM asset. The full `manifold-3d` npm package is not required. Await
+initialization before constructing a solver. Alternatively, pass an initialized
+module as the second argument, `{ manifold }`. Downloaded constructor inputs
+contain only the problem, so they can be replayed after initialization without
+serializing a WASM module.
 
 ## Collision semantics
 

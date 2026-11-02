@@ -1,4 +1,4 @@
-import type { Manifold, ManifoldToplevel } from "manifold-3d"
+import type { Manifold, ManifoldToplevel } from "@tscircuit/manifold-2d"
 import type { CollisionMesh } from "./types"
 
 /** Copy a borrowed solid's world-space mesh (right-handed mm, +Z above).

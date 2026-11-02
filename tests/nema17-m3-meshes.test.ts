@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from "bun:test"
-import type { ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { createCollisionSolid } from "../lib/collision-mesh"
 import {

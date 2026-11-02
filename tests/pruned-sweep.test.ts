@@ -1,5 +1,5 @@
 import { beforeAll, expect, test } from "bun:test"
-import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { Manifold, ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 import { loadCollisionManifold } from "../lib"
 import { TranslationSweep } from "../lib/TranslationSweep"
 import { createTranslationSweep } from "./fixtures/create-unpruned-translation-sweep"

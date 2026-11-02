@@ -1,5 +1,5 @@
 import { geometries, measurements, geom3ToIndexedMesh } from "@tscircuit/jscad"
-import type { ManifoldToplevel } from "manifold-3d"
+import type { ManifoldToplevel } from "@tscircuit/manifold-2d"
 import { createCollisionSolid, serializeCollisionMesh } from "./collision-mesh"
 import type { CollisionMesh } from "./types"
 

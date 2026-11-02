@@ -3,7 +3,7 @@ import type {
   GraphicsObject3d,
   Point3d,
 } from "@tscircuit/graphics-debug-3d"
-import type { Vec3 } from "manifold-3d"
+import type { Vec3 } from "@tscircuit/manifold-2d"
 import { getProblemBounds } from "./get-problem-bounds"
 import type {
   CadCollisionProblem,
