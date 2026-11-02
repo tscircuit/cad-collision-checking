@@ -1,4 +1,3 @@
-import { getSolverPng } from "./fixtures/get-solver-png"
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
 import { groupedProblem } from "./fixtures/problems"
@@ -9,6 +8,7 @@ test("stepping exposes progress and serializable constructor input replays witho
   const solver = new CadCollisionCheckingSolver(problem)
   solver.step()
   expect(solver.solved).toBe(false)
+  expect(solver.visualize3d().title).toContain("CHECK NOT COMPLETE")
   expect(solver.stats.preparedSolids).toBe(1)
   expect(solver.progress).toBeGreaterThan(0)
   expect(() => solver.getOutput()).toThrow("has not completed")
@@ -19,8 +19,8 @@ test("stepping exposes progress and serializable constructor input replays witho
   solver.solve()
   replay.solve()
   expect(solver.getOutput()).toEqual(replay.getOutput())
+  expect(solver.visualize3d().title).toContain("COLLISION DETECTED")
   expect(solver.progress).toBe(1)
   expect(solver.iterations).toBeGreaterThan(10)
   expect(JSON.stringify(problem)).toBe(original)
-  await expect(await getSolverPng(solver)).toMatchPngSnapshot(import.meta.path)
 })

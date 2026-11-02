@@ -7,7 +7,7 @@ import {
   NEMA17,
   renderToJscadModel,
 } from "jscad-electronics/vanilla"
-import type { ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 import {
   serializeCollisionMesh,
   type CadCollisionProblem,

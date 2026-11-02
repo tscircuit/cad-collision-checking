@@ -1,5 +1,5 @@
 import { useCallback, useState } from "react"
-import type { ManifoldToplevel } from "manifold-3d"
+import type { ManifoldToplevel } from "@tscircuit/manifold-2d"
 import { CollisionDebugger } from "./CollisionDebugger"
 import {
   mountingHoles,

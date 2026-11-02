@@ -1,4 +1,4 @@
-import type { Vec3 } from "manifold-3d"
+import type { Vec3 } from "@tscircuit/manifold-2d"
 
 export type CollisionSolidId = string
 export type CollisionMoveId = string

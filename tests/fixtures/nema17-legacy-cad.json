@@ -1,0 +1,26 @@
+{
+  "type": "cad_component",
+  "cad_component_id": "cad_component_0",
+  "model_glb_url": "https://modelcdn.tscircuit.com/jscad_models/nema17_none.glb",
+  "position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "rotation": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "layer": "top",
+  "source_component_id": "source_component_1",
+  "model_origin_position": {
+    "x": 0,
+    "y": 0,
+    "z": 0
+  },
+  "model_unit_to_mm_scale_factor": 1,
+  "model_object_fit": "contain_within_bounds",
+  "anchor_alignment": "center",
+  "show_as_translucent_model": false
+}

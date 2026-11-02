@@ -1,4 +1,4 @@
-import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { Manifold, ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 
 /** Continuous sweep of a closed triangle solid through a straight translation.
  * Inputs and output are right-handed circuit-world points in mm (+Z above);

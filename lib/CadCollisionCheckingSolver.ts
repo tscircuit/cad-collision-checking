@@ -3,7 +3,7 @@ import type {
   GraphicsObject3d,
   GraphicsCameraFixture3d,
 } from "@tscircuit/graphics-debug-3d"
-import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { Manifold, ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 import { createCollisionSolid, serializeCollisionMesh } from "./collision-mesh"
 import { TranslationSweep } from "./TranslationSweep"
 import { getInitializedCollisionManifold } from "./load-collision-manifold"
@@ -236,7 +236,10 @@ export class CadCollisionCheckingSolver extends BaseSolver {
         inputProblem: this.inputProblem,
         offsets: this.offsets,
         collisionMeshes: this.collisionMeshes,
+        collisions: this.collisions,
         moveIndex: this.moveIndex,
+        solved: this.solved,
+        failed: this.failed,
       }),
       ...camera,
     }

@@ -3,12 +3,13 @@ import type {
   GraphicsObject3d,
   Point3d,
 } from "@tscircuit/graphics-debug-3d"
-import type { Vec3 } from "manifold-3d"
+import type { Vec3 } from "@tscircuit/manifold-2d"
 import { getProblemBounds } from "./get-problem-bounds"
 import type {
   CadCollisionProblem,
   CollisionMesh,
   CollisionSolidId,
+  CadCollision,
 } from "./types"
 
 function meshPositions(mesh: CollisionMesh): number[] {
@@ -35,12 +36,18 @@ export function visualizeCollisionProblem({
   inputProblem,
   offsets,
   collisionMeshes,
+  collisions,
   moveIndex,
+  solved,
+  failed,
 }: {
   inputProblem: CadCollisionProblem
   offsets: Map<CollisionSolidId, Vec3>
   collisionMeshes: CollisionMesh[]
+  collisions: CadCollision[]
   moveIndex: number
+  solved: boolean
+  failed: boolean
 }): GraphicsObject3d {
   const movingIds = new Set(inputProblem.moves.flatMap((move) => move.solidIds))
   const meshes: GraphicsMesh3d[] = inputProblem.solids.map((solid) => ({
@@ -58,8 +65,26 @@ export function visualizeCollisionProblem({
       indices: [...mesh.triVerts],
       color: "#f97316",
     })
+  const progress = `${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves checked`
+  const status = failed
+    ? "CHECK INCOMPLETE"
+    : collisionMeshes.length
+      ? `COLLISION DETECTED: ${collisionMeshes.length} pair(s)`
+      : solved
+        ? "NO COLLISION DETECTED"
+        : "CHECK NOT COMPLETE"
   const graphics: GraphicsObject3d = {
-    title: `${Math.min(moveIndex, inputProblem.moves.length)}/${inputProblem.moves.length} moves checked - ${collisionMeshes.length} collision(s)`,
+    title: `${status} — ${progress}${collisions
+      .map((collision) => {
+        const moving = inputProblem.solids.find(
+          (solid) => solid.solidId === collision.movingSolidId,
+        )!
+        const obstacle = inputProblem.solids.find(
+          (solid) => solid.solidId === collision.obstacleSolidId,
+        )!
+        return ` — ${moving.name} / ${obstacle.name}: ${Number(collision.sweptIntersectionVolumeMm3.toPrecision(5))} mm³ new swept intersection`
+      })
+      .join("")}`,
     bounds: getProblemBounds(inputProblem),
     meshes,
     lines: [],

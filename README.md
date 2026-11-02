@@ -6,7 +6,7 @@ triangle meshes and ordered movements. Collision detection is independent of
 tscircuit/core, Circuit JSON, JSCAD and rendering. The optional visualization uses
 the scene types from `graphics-debug-3d`.
 
-![A thin wall between clear endpoint poses still produces a collision](./tests/__snapshots__/continuous-sweep.snap.png)
+![Real threaded M3 bolt colliding with a NEMA17 blind-hole floor](./tests/__snapshots__/nema17-m3-blind-hole-floor.snap.png)
 
 The 3D visualization uses released `graphics-debug-3d@0.0.1` for PoppyGL
 snapshots and interactive navigation, with the custom-renderer hook from
@@ -15,14 +15,15 @@ snapshots and interactive navigation, with the custom-renderer hook from
 ## Install
 
 ```sh
-bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.3.tgz
+bun add https://jscdn.tscircuit.com/@tscircuit/cad-collision-checking/0.0.4.tgz
 bun add https://jscdn.tscircuit.com/@tscircuit/graphics-debug-3d/0.0.1.tgz
 bun add @tscircuit/solver-utils graphics-debug
 ```
 
 The package ships TypeScript source following the handbook's source-package
 convention. GitHub Packages releases are available through jscdn; consumers such
-as core bundle the library. Manifold 3.5.4 supplies the geometry kernel.
+as core bundle the library. `@tscircuit/manifold-2d` supplies the full 3D geometry
+kernel through the same runtime used by the copper-pour solver.
 
 ## Use
 
@@ -63,11 +64,13 @@ giving the vertex stride (the first three properties are XYZ points). Optional
 Use `serializeCollisionMesh(manifoldSolid)` to copy a borrowed Manifold solid.
 The solver copies its input and never changes caller-owned geometry.
 
-`loadCollisionManifold()` loads the installed WASM package in Node/Bun and pinned
-jsDelivr assets in browsers. Await it before constructing a solver. Alternatively,
-pass an initialized module as the second argument, `{ manifold }`, for custom
-hosting. Downloaded constructor inputs contain only the problem, so they can be
-replayed after initialization without serializing a WASM module.
+`loadCollisionManifold()` lazily initializes the shared runtime. Its embedded
+WASM works in Node, browser and blob-worker bundles without a CDN download or a
+separate WASM asset. The full `manifold-3d` npm package is not required. Await
+initialization before constructing a solver. Alternatively, pass an initialized
+module as the second argument, `{ manifold }`. Downloaded constructor inputs
+contain only the problem, so they can be replayed after initialization without
+serializing a WASM module.
 
 ## Collision semantics
 
@@ -143,7 +146,7 @@ synchronous; complex interference can still take several seconds.
 
 ```sh
 bun install
-bun run start       # React Cosmos: thin wall, grouped movement, bores, NEMA17/M3
+bun run start       # React Cosmos: real NEMA17 / threaded M3 models
 bun test
 bun run typecheck
 bun run format:check
@@ -163,15 +166,19 @@ projecting 3D geometry into the inherited 2D `visualize()` format.
 Snapshots use PoppyGL. The interactive view supports orbit, pan, zoom, axis views,
 fit/reset and copying a camera fixture, and preserves navigation across solver
 steps. Pass the copied fields to `visualize3d({ cameraPosition, cameraTarget })`
-to include them in the serializable output. The grouped fixture shares its authored
-camera with all three PoppyGL stage snapshots; camera settings stay outside the
+to include them in the serializable output. Camera settings stay outside the
 collision problem and algorithm. Blue shows
 moving solids, translucent gray shows stationary obstacles, and orange shows
 actual swept intersection volume. The movement guides are not collision samples.
 
-![Assembled pose](./tests/__snapshots__/stage-0-assembled.snap.png)
-![Cover and bolt lifted together](./tests/__snapshots__/stage-1-lift-cover-and-bolt.snap.png)
-![Bolt removed through the bracket](./tests/__snapshots__/stage-2-remove-bolt.snap.png)
+Visual snapshots and interactive fixtures use the real NEMA17 and threaded M3
+models. Every snapshot states **not checked**, **no collision detected**, or
+**collision detected**, derived from the solver's actual result. Collision
+snapshots show the orange swept intersection and a callout anchored to that mesh.
+Snapshots and the debugger name each colliding pair and report its new swept
+intersection volume in mm³. This measures interference over the movement, not
+instantaneous overlap at the displayed pose.
+Synthetic boxes/cylinders remain in numerical regression tests only.
 
 Each step prepares one solid, collects sweep triangles, checks one candidate obstacle,
 or applies one target translation. Individual native geometry operations are
@@ -190,3 +197,25 @@ including spatial volume comparisons, containment and existing overlaps.
 This repository was provisioned through
 [tscircuit/create-repo #103](https://github.com/tscircuit/create-repo/pull/103)
 and follows the [handbook](https://github.com/tscircuit/handbook/blob/main/guides/bootstrapping-repos.md).
+
+## Imported mesh preparation
+
+`prepareCollisionMesh(mesh, manifold)` prepares actual imported triangle meshes
+before passing them to `CadCollisionCheckingSolver`. Use a format loader such as
+`circuit-json-to-gltf`'s `loadCadComponentMesh` to apply the model's placement first.
+Points must be right-handed world millimetres, +Z above, with outward winding.
+
+Already valid solids keep their geometry. Nonconforming triangle boundaries use
+`@tscircuit/jscad`'s existing subdivision routine; boundary adjustment tolerance is
+limited to 0.001 mm. This does not fill holes, create convex hulls or fall back to
+bounding boxes. Open meshes, inward winding and models needing coarser repair
+throw. Callers must report incomplete coverage for those models. Zero-clearance
+contact remains sensitive to tessellation at this precision.
+
+`createCollisionSolid(mesh, manifold)` performs strict validation without repair
+and returns a caller-owned Manifold that must be deleted. The preparation helper
+returns an owned serializable mesh and frees its temporary WASM objects.
+
+The [legacy NEMA17 reproduction](tests/fixtures/nema17-legacy-mesh.md) tests real
+modelcdn triangles and threaded modelprinter bolts, including the motor's blind
+hole floor and preserved bore dimensions.

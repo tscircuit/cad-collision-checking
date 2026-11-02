@@ -16,6 +16,8 @@
     "tests",
     "pages",
     "benchmarking",
+    "playwright",
+    "playwright.config.ts",
     "vite.config.ts",
     "cosmos.decorator.tsx"
   ]

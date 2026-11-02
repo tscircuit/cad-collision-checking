@@ -1,4 +1,4 @@
-import type { Manifold, ManifoldToplevel } from "manifold-3d"
+import type { Manifold, ManifoldToplevel } from "@tscircuit/manifold-2d"
 import type { CollisionMesh } from "./types"
 
 /** Copy a borrowed solid's world-space mesh (right-handed mm, +Z above).
@@ -37,7 +37,7 @@ export function createCollisionSolid(
   } catch {
     throw new Error("Collision geometry must be a nonempty closed solid")
   }
-  if (solid.status() !== "NoError" || solid.isEmpty()) {
+  if (solid.status() !== "NoError" || solid.isEmpty() || solid.volume() <= 0) {
     solid.delete()
     throw new Error("Collision geometry must be a nonempty closed solid")
   }

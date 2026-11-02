@@ -1,4 +1,4 @@
-import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { Manifold, ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 
 type Bounds = ReturnType<Manifold["boundingBox"]>
 type Triangle = {
