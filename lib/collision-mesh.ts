@@ -37,7 +37,7 @@ export function createCollisionSolid(
   } catch {
     throw new Error("Collision geometry must be a nonempty closed solid")
   }
-  if (solid.status() !== "NoError" || solid.isEmpty()) {
+  if (solid.status() !== "NoError" || solid.isEmpty() || solid.volume() <= 0) {
     solid.delete()
     throw new Error("Collision geometry must be a nonempty closed solid")
   }

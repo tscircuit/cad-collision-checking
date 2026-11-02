@@ -194,3 +194,25 @@ including spatial volume comparisons, containment and existing overlaps.
 This repository was provisioned through
 [tscircuit/create-repo #103](https://github.com/tscircuit/create-repo/pull/103)
 and follows the [handbook](https://github.com/tscircuit/handbook/blob/main/guides/bootstrapping-repos.md).
+
+## Imported mesh preparation
+
+`prepareCollisionMesh(mesh, manifold)` prepares actual imported triangle meshes
+before passing them to `CadCollisionCheckingSolver`. Use a format loader such as
+`circuit-json-to-gltf`'s `loadCadComponentMesh` to apply the model's placement first.
+Points must be right-handed world millimetres, +Z above, with outward winding.
+
+Already valid solids keep their geometry. Nonconforming triangle boundaries use
+`@tscircuit/jscad`'s existing subdivision routine; boundary adjustment tolerance is
+limited to 0.001 mm. This does not fill holes, create convex hulls or fall back to
+bounding boxes. Open meshes, inward winding and models needing coarser repair
+throw. Callers must report incomplete coverage for those models. Zero-clearance
+contact remains sensitive to tessellation at this precision.
+
+`createCollisionSolid(mesh, manifold)` performs strict validation without repair
+and returns a caller-owned Manifold that must be deleted. The preparation helper
+returns an owned serializable mesh and frees its temporary WASM objects.
+
+The [legacy NEMA17 reproduction](tests/fixtures/nema17-legacy-mesh.md) tests real
+modelcdn triangles and threaded modelprinter bolts, including the motor's blind
+hole floor and preserved bore dimensions.

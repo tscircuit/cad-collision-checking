@@ -27,6 +27,7 @@
     "build:site": "cosmos-export"
   },
   "dependencies": {
+    "@tscircuit/jscad": "0.0.6",
     "manifold-3d": "3.5.4"
   },
   "peerDependencies": {
