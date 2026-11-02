@@ -10,7 +10,7 @@ import {
   loadCollisionManifold,
   type CadCollisionProblem,
 } from "../lib"
-import type { ManifoldToplevel } from "manifold-3d"
+import type { ManifoldToplevel } from "@tscircuit/manifold-2d"
 
 export function CollisionDebugger({
   createProblem,
