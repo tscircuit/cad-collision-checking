@@ -20,11 +20,16 @@ import { loadCadComponentMesh } from "circuit-json-to-gltf"
 import { cad_component } from "circuit-json"
 const cad = cad_component.parse(await Bun.file("nema17-legacy-cad.json").json())
 const mesh = await loadCadComponentMesh(cad)
-await Bun.write("nema17-legacy-mesh.json.gz", Bun.gzipSync(JSON.stringify({
-  numProp: 3,
-  vertProperties: mesh.positions,
-  triVerts: mesh.indices,
-})))
+await Bun.write(
+  "nema17-legacy-mesh.json.gz",
+  Bun.gzipSync(
+    JSON.stringify({
+      numProp: 3,
+      vertProperties: mesh.positions,
+      triVerts: mesh.indices,
+    }),
+  ),
+)
 ```
 
 Verify source bytes against the hash before refreshing. `bun test tests/imported-m`
