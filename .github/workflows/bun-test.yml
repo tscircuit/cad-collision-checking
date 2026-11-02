@@ -31,6 +31,9 @@ jobs:
       - name: Run tests
         run: bun test
 
+      - name: Test clean package installation
+        run: bun run test:package
+
       - name: Install browser for bundled worker regression
         run: bunx playwright install --with-deps chromium
 
