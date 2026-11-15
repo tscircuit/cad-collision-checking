@@ -3,9 +3,9 @@ import type {
   GraphicsObject3d,
   GraphicsCameraFixture3d,
 } from "@tscircuit/graphics-debug-3d"
-import type { Manifold, ManifoldToplevel, Vec3 } from "manifold-3d"
+import type { Manifold, ManifoldToplevel, Vec3 } from "@tscircuit/manifold-2d"
 import { createCollisionSolid, serializeCollisionMesh } from "./collision-mesh"
-import { createTranslationSweep } from "./create-translation-sweep"
+import { TranslationSweep } from "./TranslationSweep"
 import { getInitializedCollisionManifold } from "./load-collision-manifold"
 import { validateCollisionProblem } from "./validate-collision-problem"
 import { visualizeCollisionProblem } from "./visualize-collision-problem"
@@ -44,7 +44,9 @@ export class CadCollisionCheckingSolver extends BaseSolver {
   private checkedPairCount = 0
   private candidates: CollisionSolidId[] = []
   private candidateIndex = 0
-  private entered?: Manifold
+  private sweep?: TranslationSweep
+  private sweptTriangleCount = 0
+  private constructedPrismCount = 0
   private disposed = false
 
   constructor(
@@ -109,7 +111,7 @@ export class CadCollisionCheckingSolver extends BaseSolver {
     if (this.movingIndex < movingSolidIds.length) {
       const movingSolidId = movingSolidIds[this.movingIndex]
       const movingSolid = this.solids.get(movingSolidId)!
-      if (!this.entered) {
+      if (!this.sweep) {
         const bounds = movingSolid.boundingBox()
         const sweptBounds = {
           min: bounds.min.map(
@@ -132,32 +134,24 @@ export class CadCollisionCheckingSolver extends BaseSolver {
           this.movingIndex++
           return
         }
-        const sweep = createTranslationSweep(
-          { solid: movingSolid, displacement: move.translation },
+        this.sweep = new TranslationSweep(
+          movingSolid,
+          move.translation,
           this.manifold,
         )
-        try {
-          // Exclude existing occupied space, not the whole overlapping pair:
-          // separating is allowed, but moving deeper still enters new geometry.
-          this.entered = sweep.subtract(movingSolid)
-          if (this.entered.status() !== "NoError")
-            throw new Error("Could not evaluate newly swept geometry")
-        } finally {
-          sweep.delete()
-        }
         this.candidateIndex = 0
         return
       }
       const obstacleSolidId = this.candidates[this.candidateIndex]
       if (obstacleSolidId === undefined) {
-        this.entered.delete()
-        this.entered = undefined
+        this.sweep = undefined
         this.movingIndex++
         return
       }
-      const intersection = this.entered.intersect(
-        this.solids.get(obstacleSolidId)!,
-      )
+      const { intersection, sweptTriangles, constructedPrisms } =
+        this.sweep.intersect(this.solids.get(obstacleSolidId)!)
+      this.sweptTriangleCount += sweptTriangles
+      this.constructedPrismCount += constructedPrisms
       try {
         if (intersection.status() !== "NoError")
           throw new Error("Could not intersect collision solids")
@@ -220,6 +214,8 @@ export class CadCollisionCheckingSolver extends BaseSolver {
       preparedSolids: this.preparedCount,
       completedMoves: this.moveIndex,
       checkedPairs: this.checkedPairCount,
+      sweptTriangles: this.sweptTriangleCount,
+      constructedPrisms: this.constructedPrismCount,
       collisions: this.collisions.length,
     }
   }
@@ -247,7 +243,10 @@ export class CadCollisionCheckingSolver extends BaseSolver {
         inputProblem: this.inputProblem,
         offsets: this.offsets,
         collisionMeshes: this.collisionMeshes,
+        collisions: this.collisions,
         moveIndex: this.moveIndex,
+        solved: this.solved,
+        failed: this.failed,
       }),
       ...camera,
     }
@@ -260,8 +259,7 @@ export class CadCollisionCheckingSolver extends BaseSolver {
   dispose() {
     if (this.disposed) return
     this.disposed = true
-    this.entered?.delete()
-    this.entered = undefined
+    this.sweep = undefined
     for (const solid of this.solids.values()) solid.delete()
     this.solids.clear()
     if (!this.solved && !this.failed) {
