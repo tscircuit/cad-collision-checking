@@ -1,4 +1,4 @@
-import type { Vec3 } from "manifold-3d"
+import type { Vec3 } from "@tscircuit/manifold-2d"
 import type { CadCollisionProblem, CollisionSolidId } from "./types"
 
 /** Stable world-space point bounds (right-handed mm, +Z above) including every
