@@ -1,9 +1,11 @@
 import { expect, test } from "bun:test"
 import { CadCollisionCheckingSolver, loadCollisionManifold } from "../lib"
-import { thinWallProblem } from "./fixtures/problems"
+import { getProblemBounds } from "../lib/get-problem-bounds"
+import { box, thinWallProblem } from "./fixtures/problems"
 
 test("invalid geometry and abandoned or exhausted solvers cannot claim a successful check", async () => {
-  const problem = thinWallProblem(await loadCollisionManifold())
+  const manifold = await loadCollisionManifold()
+  const problem = thinWallProblem(manifold)
   const missing = structuredClone(problem)
   missing.moves[0].solidIds = ["MISSING"]
   expect(() => new CadCollisionCheckingSolver(missing)).toThrow("missing solid")
@@ -30,5 +32,20 @@ test("invalid geometry and abandoned or exhausted solvers cannot claim a success
   exhausted.solve()
   expect(exhausted.failed).toBe(true)
   expect(exhausted.solved).toBe(false)
+  expect((exhausted as unknown as { disposed: boolean }).disposed).toBe(true)
+  expect(
+    (exhausted as unknown as { solids: Map<string, unknown> }).solids.size,
+  ).toBe(0)
   expect(() => exhausted.getOutput()).toThrow()
+
+  const offOriginBounds = getProblemBounds({
+    solids: [
+      box({ solidId: "PART", size: [4, 6, 8], center: [20, 30, 40] }, manifold),
+    ],
+    moves: [],
+  })
+  expect(offOriginBounds).toEqual({
+    min: [18, 27, 36],
+    max: [22, 33, 44],
+  })
 })
