@@ -104,6 +104,11 @@ checks rigid translations of supplied meshes; rotations, flexible bodies,
 thread engagement, and unprovided geometry are outside its coverage. Fastener
 meshes themselves, including modeled threads and sockets, are checked normally.
 
+Use `checkStaticCollisions(problem.solids)` after `loadCollisionManifold()` to
+check the assembled pose. It returns each intersecting pair once with
+`solidIds` and `intersectionVolumeMm3`. Face contact is allowed. The static
+check works with or without an explosion program.
+
 ## Real motor and fastener regression
 
 The NEMA17 fixture regenerates `nema17`, `hexbolt_m3_l4`, and `hexbolt_m3_l6`

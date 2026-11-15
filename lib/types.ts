@@ -46,3 +46,9 @@ export interface CadCollision {
 export interface CadCollisionResult {
   collisions: CadCollision[]
 }
+
+export interface CadStaticCollision {
+  solidIds: [CollisionSolidId, CollisionSolidId]
+  /** Overlapping volume in the supplied pose, in mm³. */
+  intersectionVolumeMm3: number
+}
