@@ -14,11 +14,45 @@ export function serializeCollisionMesh(solid: Manifold): CollisionMesh {
   }
 }
 
+export function validateCollisionMesh(mesh: CollisionMesh) {
+  if (
+    !Number.isInteger(mesh.numProp) ||
+    mesh.numProp < 3 ||
+    !mesh.vertProperties.length ||
+    mesh.vertProperties.length % mesh.numProp ||
+    !mesh.triVerts.length ||
+    mesh.triVerts.length % 3 ||
+    !mesh.vertProperties.every(Number.isFinite)
+  )
+    throw new Error("Collision meshes require finite triangle geometry")
+  const vertexCount = mesh.vertProperties.length / mesh.numProp
+  if (
+    !mesh.triVerts.every(
+      (vertex) =>
+        Number.isInteger(vertex) && vertex >= 0 && vertex < vertexCount,
+    )
+  )
+    throw new Error(
+      "Collision mesh triangle indices must reference existing vertices",
+    )
+  if (
+    (mesh.mergeFromVert?.length ?? 0) !== (mesh.mergeToVert?.length ?? 0) ||
+    ![...(mesh.mergeFromVert ?? []), ...(mesh.mergeToVert ?? [])].every(
+      (vertex) =>
+        Number.isInteger(vertex) && vertex >= 0 && vertex < vertexCount,
+    )
+  )
+    throw new Error(
+      "Collision mesh merge indices must reference existing vertices",
+    )
+}
+
 /** Construct a caller-owned solid from serialized world points in mm (+Z above). */
 export function createCollisionSolid(
   mesh: CollisionMesh,
   manifold: ManifoldToplevel,
 ): Manifold {
+  validateCollisionMesh(mesh)
   let solid: Manifold
   try {
     solid = new manifold.Manifold(
